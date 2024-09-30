@@ -197,14 +197,21 @@ class DiemThongKeApp(QWidget):
                 thong_ke_diem = lop_data['Diem'].value_counts().reindex(['A', 'B+', 'B', 'C+', 'C', 'D+', 'D', 'F'], fill_value=0)
 
                 plt.figure()
-                thong_ke_diem.plot(kind='bar', color=[ 'blue', 'orange', 'green', 'red', 'purple', 'pink', 'gray', 'brown'])
+                thong_ke_diem.plot(kind='bar', color=['blue', 'orange', 'green', 'red', 'purple', 'pink', 'gray', 'brown'])
                 plt.title(f'Phân bố điểm lớp {lop}')
                 plt.xlabel('Điểm')
                 plt.ylabel('Số sinh viên')
                 plt.xticks(rotation=0)
+
+                # Lưu biểu đồ vào file PNG
+                file_name = f'PhanBoDiem_Lop_{lop}.png'
+                plt.savefig(file_name)
+                QMessageBox.information(self, "Thông báo", f'Đã lưu biểu đồ phân bố điểm lớp {lop} thành file: {file_name}')
+
                 plt.show()
         else:
             QMessageBox.warning(self, "Lỗi", "Chưa có dữ liệu sinh viên nào.")
+
 
 
 if __name__ == '__main__':
