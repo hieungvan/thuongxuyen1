@@ -1,8 +1,8 @@
 import sys
 import pandas as pd
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit, QHBoxLayout, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView, QSizePolicy
+from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QFileDialog, QLineEdit, QHBoxLayout, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView, QSizePolicy
 import matplotlib.pyplot as plt
-from PyQt5.QtCore import Qt
+from PyQt6.QtCore import Qt
 import os
 
 
@@ -49,22 +49,22 @@ class DiemThongKeApp(QWidget):
         # Nút thêm dữ liệu sinh viên
         self.btnThemSV = QPushButton('Thêm sinh viên và lưu vào CSV', self)
         # Thay đổi kích thước cho hợp lý
-        self.btnThemSV.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btnThemSV.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         layout.addWidget(self.btnThemSV, alignment=Qt.AlignCenter)
 
         # Nút hiện bảng thông tin sinh viên
         self.btnHienBang = QPushButton('Hiện bảng thông tin sinh viên', self)
-        self.btnHienBang.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btnHienBang.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         layout.addWidget(self.btnHienBang, alignment=Qt.AlignCenter)
 
         # Nút mở file CSV
         self.btnOpenFile = QPushButton('Mở file CSV', self)
-        self.btnOpenFile.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btnOpenFile.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         layout.addWidget(self.btnOpenFile, alignment=Qt.AlignCenter)
 
         # Nút thống kê lớp có nhiều điểm A nhất
         self.btnThongKe = QPushButton('Thống kê lớp có nhiều điểm A nhất', self)
-        self.btnThongKe.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.btnThongKe.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         layout.addWidget(self.btnThongKe, alignment=Qt.AlignCenter)
 
         # Nút vẽ đồ thị phân bố điểm
