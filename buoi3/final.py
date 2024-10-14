@@ -81,6 +81,13 @@ class DiemThongKeApp(QWidget):
         self.btnThongKe.clicked.connect(self.thongKeLop)
         self.btnVeDoThi.clicked.connect(self.veDoThiTheoTungLop)
 
+        self.btnVeBieuDoDuong = QPushButton('Vẽ biểu đồ dạng đường', self)
+        self.btnVeBieuDoDuong.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        layout.addWidget(self.btnVeBieuDoDuong, alignment=Qt.AlignCenter)
+
+        # Kết nối nút với hàm veBieuDoDuong
+        self.btnVeBieuDoDuong.clicked.connect(self.veBieuDoDuong)
+
     def openFileDialog(self):
         options = QFileDialog.Options()
         fileName, _ = QFileDialog.getOpenFileName(self, "Mở file CSV", "", "CSV Files (*.csv);;All Files (*)", options=options)
@@ -207,6 +214,30 @@ class DiemThongKeApp(QWidget):
                 file_name = f'PhanBoDiem_Lop_{lop}.png'
                 plt.savefig(file_name)
                 QMessageBox.information(self, "Thông báo", f'Đã lưu biểu đồ phân bố điểm lớp {lop} thành file: {file_name}')
+
+                plt.show()
+        else:
+            QMessageBox.warning(self, "Lỗi", "Chưa có dữ liệu sinh viên nào.")
+    
+    # Hàm veBieuDoDuong
+    def veBieuDoDuong(self):
+        if hasattr(self, 'data'):
+            ds_lop = self.data['Lop'].unique()
+            for lop in ds_lop:
+                lop_data = self.data[self.data['Lop'] == lop]
+                thong_ke_diem = lop_data['Diem'].value_counts().reindex(['A', 'B+', 'B', 'C+', 'C', 'D+', 'D', 'F'], fill_value=0)
+
+                plt.figure()
+                thong_ke_diem.plot(kind='line', marker='o', color='blue')
+                plt.title(f'Phân bố điểm dạng đường - Lớp {lop}')
+                plt.xlabel('Điểm')
+                plt.ylabel('Số sinh viên')
+                plt.xticks(rotation=0)
+
+                # Lưu biểu đồ vào file PNG
+                file_name = f'BieuDoDuong_Lop_{lop}.png'
+                plt.savefig(file_name)
+                QMessageBox.information(self, "Thông báo", f'Đã lưu biểu đồ dạng đường lớp {lop} thành file: {file_name}')
 
                 plt.show()
         else:
