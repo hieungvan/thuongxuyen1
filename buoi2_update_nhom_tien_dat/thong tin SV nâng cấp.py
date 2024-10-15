@@ -1,0 +1,227 @@
+import numpy as np
+import tkinter as tk
+from tkinter import messagebox, simpledialog, ttk
+from tkinter import filedialog
+import csv
+
+data = []
+
+def import_data():
+    global data
+    """Import student data from a CSV file."""
+    # Mở hộp thoại để chọn file CSV
+    file_path = filedialog.askopenfilename(defaultextension=".csv",
+                                           filetypes=[("CSV files", "*.csv"), ("All files", "*.*")], title="Chọn file CSV để nhập")
+    if not file_path:
+        return None
+
+    data = []
+    try:
+        #
+
+        messagebox.showinfo(
+            "Thành công", f"Dữ liệu đã được nhập từ file {file_path}.")
+        data = load_data(file_path)
+        print(data)
+        return
+    except Exception as e:
+        messagebox.showerror("Error", f"Đã xảy ra lỗi khi nhập file CSV: {e}")
+        return None
+def export_data(data):
+    """Export student data to a CSV file."""
+    if data.size == 0:
+        messagebox.showerror("Error", "Không có dữ liệu để xuất.")
+        return
+
+    # Mở hộp thoại để chọn nơi lưu file CSV
+    file_path = filedialog.asksaveasfilename(defaultextension=".csv",
+                                             filetypes=[
+                                                 ("CSV files", "*.csv"), ("All files", "*.*")],
+                                             title="Lưu file CSV")
+    if not file_path:
+        return
+
+    try:
+        # Mở file CSV để ghi
+        with open(file_path, mode='w', newline='', encoding='utf-8-sig') as file:
+            writer = csv.writer(file)
+
+            # Ghi tiêu đề (headers) nếu cần
+            writer.writerow(["ID", "Tên", "Môn học", "Điểm"])
+
+            # Ghi dữ liệu sinh viên
+            for row in data:
+                writer.writerow(row)
+
+        messagebox.showinfo(
+            "Thành công", f"Dữ liệu đã được xuất ra file {file_path}.")
+    except Exception as e:
+        messagebox.showerror("Error", f"Đã xảy ra lỗi khi xuất file CSV: {e}")   
+def load_data(file_path):
+    """Load data from a CSV file into a numpy array."""
+    try:
+        data = np.genfromtxt(file_path, delimiter=',', dtype=str, encoding='utf-8', skip_header=1)
+        return data
+    except Exception as e:
+        print(f"Error loading data: {e}")
+        return np.array([])
+
+def show_list_student():
+    if data.size == 0:
+        messagebox.showerror("Lỗi", "Dữ liệu không được tải.")
+        return
+    
+    # Tạo một cửa sổ mới để hiển thị danh sách sinh viên
+    list_window = tk.Toplevel()
+    list_window.title("Danh sách sinh viên")
+    list_window.geometry("700x400")
+    list_window.resizable(False,False)
+
+    # Tạo Treeview widget để hiển thị danh sách
+    tree = ttk.Treeview(list_window, columns=("ID", "Name", "Math", "Physics", "Chemistry"), show="headings")
+    tree.pack(expand=True, fill='both')
+
+    # Định nghĩa các cột
+    tree.heading("ID", text="ID Sinh viên")
+    tree.heading("Name", text="Tên Sinh viên")
+    tree.heading("Math", text="Toán")
+    tree.heading("Physics", text="Lý")
+    tree.heading("Chemistry", text="Hóa")
+
+    # Cài đặt kích thước của các cột
+    tree.column("ID", width=100, anchor='center')
+    tree.column("Name", width=200, anchor='w')
+    tree.column("Math", width=100, anchor='center')
+    tree.column("Physics", width=100, anchor='center')
+    tree.column("Chemistry", width=100, anchor='center')
+
+    # Nhóm dữ liệu theo ID và tên
+    student_dict = {}
+    for row in data:
+        student_id = row[0] 
+        student_name = row[1]  
+        subject = row[2]  
+        grade = row[3]  
+
+        if (student_id, student_name) not in student_dict:
+            # Khởi tạo một mục nhập mới cho sinh viên với điểm mặc định là None
+            student_dict[(student_id, student_name)] = {'Math': '', 'Physics': '', 'Chemistry': ''}
+
+        # Gán điểm vào cột tương ứng
+        if subject == 'Toán':
+            student_dict[(student_id, student_name)]['Math'] = grade
+        elif subject == 'Lý':
+            student_dict[(student_id, student_name)]['Physics'] = grade
+        elif subject == 'Hóa':
+            student_dict[(student_id, student_name)]['Chemistry'] = grade
+
+    # Chèn dữ liệu vào Treeview
+    for (student_id, student_name), grades in student_dict.items():
+        # Gộp điểm các môn học vào một dòng
+        tree.insert("", tk.END, values=(
+            student_id,
+            student_name,
+            grades['Math'],
+            grades['Physics'],
+            grades['Chemistry']
+        ))
+
+
+def search_student(data, student_id):
+    """Search for a student's information by ID."""
+    if data.size == 0:
+        return "Dữ liệu không được tải."
+
+    student_data = data[data[:, 0] == student_id]
+    if student_data.size == 0:
+        return f"Không tìm thấy thông tin cho sinh viên có ID {student_id}."
+    else:
+        return "\n".join([", ".join(row) for row in student_data])
+
+
+def search_subject(data, subject_name):
+    """Search for grades of a specific subject."""
+    if data.size == 0:
+        return "Dữ liệu không được tải."
+
+    subject_data = data[data[:, 2] == subject_name]
+    if subject_data.size == 0:
+        return f"Không tìm thấy điểm cho môn học {subject_name}."
+    else:
+        return "\n".join([f"ID: {row[0]}, Tên: {row[1]}, Điểm: {row[3]}" for row in subject_data])
+
+
+def calculate_average(data, student_id):
+    """Calculate the average grade for a specific student using numpy."""
+    if data.size == 0:
+        return "Dữ liệu không được tải."
+
+    student_data = data[data[:, 0] == student_id]
+    if student_data.size == 0:
+        return f"Không tìm thấy thông tin cho sinh viên có ID {student_id}."
+    else:
+        try:
+            grades = student_data[:, 3].astype(float)  # Convert grades to float
+            average_grade = np.mean(grades)
+            return f"Trung bình cộng điểm của sinh viên có ID {student_id} là {average_grade:.2f}."
+        except ValueError:
+            return "Có lỗi khi chuyển đổi điểm sang số thực. Vui lòng kiểm tra dữ liệu."
+
+
+def search_action():
+    choice = choice_var.get()
+    student_id = id_entry.get()
+    subject_name = subject_entry.get()
+
+    if choice == '1':  # Tìm kiếm thông tin sinh viên
+        result = search_student(data, student_id)
+    elif choice == '2':  # Tìm kiếm điểm môn học
+        result = search_subject(data, subject_name)
+    elif choice == '3':  # Tính TBC điểm của sinh viên
+        result = calculate_average(data, student_id)
+    else:
+        result = "Lựa chọn không hợp lệ."
+
+    messagebox.showinfo("Kết quả", result)
+
+
+def main():
+    global data
+    
+
+    # Tạo cửa sổ chính
+    root = tk.Tk()
+    root.title("Tìm kiếm thông tin sinh viên")
+
+    # Thêm các widget
+    tk.Label(root, text="Chọn hành động:").pack(pady=5)
+
+    global choice_var
+    choice_var = tk.StringVar(value='1')
+
+    tk.Radiobutton(root, text="Tìm kiếm thông tin sinh viên", variable=choice_var, value='1').pack(anchor='w')
+    tk.Radiobutton(root, text="Tìm kiếm điểm môn học", variable=choice_var, value='2').pack(anchor='w')
+    tk.Radiobutton(root, text="Tính TBC điểm của sinh viên", variable=choice_var, value='3').pack(anchor='w')
+
+    tk.Label(root, text="ID sinh viên:").pack(pady=5)
+    global id_entry
+    id_entry = tk.Entry(root)
+    id_entry.pack(pady=5)
+
+    tk.Label(root, text="Tên môn học (nếu có):").pack(pady=5)
+    global subject_entry
+    subject_entry = tk.Entry(root)
+    subject_entry.pack(pady=5)
+
+    tk.Button(root, text="Tìm kiếm", command=search_action).pack(pady=10)
+    
+    tk.Button(root, text="Nhập file CSV", command=import_data).pack(pady=10)
+    # them " button export file"
+    tk.Button(root, text="Xuất file CSV",
+              command=lambda: export_data(data)).pack(pady=10)
+    tk.Button(root, text="Danh sách sinh viên",command=show_list_student).pack(pady=10)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
